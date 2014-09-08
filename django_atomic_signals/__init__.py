@@ -28,7 +28,12 @@ if not hasattr(Atomic, '_djts_patched'):
         connection = get_connection(self.using)
 
         outermost = not connection.in_atomic_block
-        self._djts_outermost_stack.append(outermost)
+        try:
+            stack = self._djts_outermost_stack
+        except AttributeError:
+            # __init__ has not been patched in time
+            stack = self._djts_outermost_stack = []
+        stack.append(outermost)
 
         pre_enter_atomic_block.send(sender=Atomic,
                                     using=self.using,
